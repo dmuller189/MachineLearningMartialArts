@@ -1,0 +1,1008 @@
+
+
+```{r Data Loading, cleaning, and shaping}
+#loading raw data and libraries
+library(dplyr)
+
+Fights_data <- read.csv("UFC_Rounds.csv")
+
+#first 225 observations were essentially zero, so remove them
+Fights_data <- Fights_data[-c(1:225), ]
+
+#removing initial features irrelevant features (element number, location, max round, homertown, )
+Fights_data$HomeTown <- NULL
+Fights_data$Location <- NULL
+Fights_data$X <- NULL
+Fights_data$Prev <- NULL
+
+
+#filtering out fights not ending in decions, only care about fights ending in decion
+Fights_data <- dplyr::filter(Fights_data, Fights_data$winby == "DEC")
+#filtering out fights ending in no contest
+Fights_data <- dplyr::filter(Fights_data, Fights_data$winner != "no contest")
+
+#Consolidating, combinnig, and selecting features, by round
+
+
+Fights_data$Round1_Grappling_Standups_Landed <- NULL
+Fights_data$Round2_Grappling_Standups_Landed <- NULL
+Fights_data$Round3_Grappling_Standups_Landed <- NULL
+Fights_data$Round4_Grappling_Standups_Landed <- NULL
+Fights_data$Round5_Grappling_Standups_Landed <- NULL
+
+Fights_data$Round1_Strikes_Body.Significant.Strikes_Attempts <- NULL
+Fights_data$Round2_Strikes_Body.Significant.Strikes_Attempts <- NULL
+Fights_data$Round3_Strikes_Body.Significant.Strikes_Attempts <- NULL
+Fights_data$Round4_Strikes_Body.Significant.Strikes_Attempts <- NULL
+Fights_data$Round5_Strikes_Body.Significant.Strikes_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Clinch.Significant.Kicks_Attempts <- NULL
+Fights_data$Round2_Strikes_Clinch.Significant.Kicks_Attempts <- NULL
+Fights_data$Round3_Strikes_Clinch.Significant.Kicks_Attempts <- NULL
+Fights_data$Round4_Strikes_Clinch.Significant.Kicks_Attempts <- NULL
+Fights_data$Round5_Strikes_Clinch.Significant.Kicks_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Clinch.Significant.Punches_Attempts <- NULL
+Fights_data$Round2_Strikes_Clinch.Significant.Punches_Attempts <- NULL
+Fights_data$Round3_Strikes_Clinch.Significant.Punches_Attempts <- NULL
+Fights_data$Round4_Strikes_Clinch.Significant.Punches_Attempts <- NULL
+Fights_data$Round5_Strikes_Clinch.Significant.Punches_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Clinch.Significant.Strikes_Attempts <- NULL
+Fights_data$Round2_Strikes_Clinch.Significant.Strikes_Attempts <- NULL
+Fights_data$Round3_Strikes_Clinch.Significant.Strikes_Attempts <- NULL
+Fights_data$Round4_Strikes_Clinch.Significant.Strikes_Attempts <- NULL
+Fights_data$Round5_Strikes_Clinch.Significant.Strikes_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Ground.Significant.Kicks_Attempts <- NULL
+Fights_data$Round2_Strikes_Ground.Significant.Kicks_Attempts <- NULL
+Fights_data$Round3_Strikes_Ground.Significant.Kicks_Attempts <- NULL
+Fights_data$Round4_Strikes_Ground.Significant.Kicks_Attempts <- NULL
+Fights_data$Round5_Strikes_Ground.Significant.Kicks_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Ground.Significant.Punches_Attempts <- NULL
+Fights_data$Round2_Strikes_Ground.Significant.Punches_Attempts <- NULL
+Fights_data$Round3_Strikes_Ground.Significant.Punches_Attempts <- NULL
+Fights_data$Round4_Strikes_Ground.Significant.Punches_Attempts <- NULL
+Fights_data$Round5_Strikes_Ground.Significant.Punches_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Ground.Significant.Strikes_Attempts <- NULL
+Fights_data$Round2_Strikes_Ground.Significant.Strikes_Attempts <- NULL
+Fights_data$Round3_Strikes_Ground.Significant.Strikes_Attempts <- NULL
+Fights_data$Round4_Strikes_Ground.Significant.Strikes_Attempts <- NULL
+Fights_data$Round5_Strikes_Ground.Significant.Strikes_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Head.Significant.Strikes_Attempts <- NULL
+Fights_data$Round2_Strikes_Head.Significant.Strikes_Attempts <- NULL
+Fights_data$Round3_Strikes_Head.Significant.Strikes_Attempts <- NULL
+Fights_data$Round4_Strikes_Head.Significant.Strikes_Attempts <- NULL
+Fights_data$Round5_Strikes_Head.Significant.Strikes_Attempts <- NULL
+
+Fights_data$Round1_Strikes_Legs.Significant.Strikes_Attempts <- NULL
+Fights_data$Round2_Strikes_Legs.Significant.Strikes_Attempts <- NULL
+Fights_data$Round3_Strikes_Legs.Significant.Strikes_Attempts <- NULL
+Fights_data$Round4_Strikes_Legs.Significant.Strikes_Attempts <- NULL
+Fights_data$Round5_Strikes_Legs.Significant.Strikes_Attempts <- NULL
+
+Fights_data$Round1_TIP_Neutral.Time <- NULL
+Fights_data$Round2_TIP_Neutral.Time <- NULL
+Fights_data$Round3_TIP_Neutral.Time <- NULL
+Fights_data$Round4_TIP_Neutral.Time <- NULL
+Fights_data$Round5_TIP_Neutral.Time <- NULL
+
+Fights_data$winby <- NULL #all are by decision
+#Fights_data$Fight_ID <- NULL
+
+
+
+#converting 'winner' into binary values (either 0 or 1)
+#red = 0, blue = 1
+Fights_data$winner <- as.character(Fights_data$winner)
+
+Fights_data$winner[Fights_data$winner == "red"] <- 0
+Fights_data$winner[Fights_data$winner == "blue"] <- 1
+
+
+#converting 'corner' into binary values (red = 0, and blue = 1)
+Fights_data$corner <- as.character(Fights_data$corner)
+
+Fights_data$corner[Fights_data$corner == "red"] <- 0
+Fights_data$corner[Fights_data$corner == "blue"] <- 1
+
+
+#adding feature denoting whether that fight won or loss
+#win denoted by 1, and a fight is a win if 'corner' == 'winner'
+Fights_data$victor <- as.numeric(Fights_data$corner == Fights_data$winner)
+
+
+
+#normalizing features such that for each feature, mean = 0 and sd = 1, only normalizing numeric features
+features_to_normalize <- c(1:ncol(Fights_data))[-c(
+  1,2,3,4,5,6,7,8,11,12,394)] #dont normalize (date, Event_ID, winner, corner,last_round, max_round, RStreak, ID, Name, victor )
+
+
+#separate data frame but where features are standardized to z score
+Fights_data_standardized <- Fights_data
+
+
+#standardizing features where now X <- (x - mean(X))/sd(X)
+for (i in features_to_normalize) {
+  Fights_data_standardized[,i] <- (Fights_data_standardized[,i] - mean(Fights_data_standardized[,i])) / sd(Fights_data_standardized[,i])
+}
+
+```
+
+
+```{r Exploratory Analysis and Visualizations Preliminaries}
+#Exploratory analysis - Visualizations, descriptive statistics and insight
+library(tidyverse)
+
+#motivating questions and idea
+#1) variable distributions
+#2) variance and covariance of and between variables
+#3) 
+#4) Descriptive stats(mean, median, mode, variance... )
+#5) outilers
+#6) Miscilaneous (other analytics and info)
+
+```
+
+
+```{r Visualizing Distributions 1 - Frequency Distributions}
+library(ggplot2)
+all_data <- read.csv("UFC_Rounds.csv")
+
+#Vairable Distributions
+
+#frequency distribution and identifying distributions
+
+#histogram of age
+ggplot2::ggplot(Fights_data, mapping = aes(x = Age)) + geom_histogram(bins = 25)
+
+#round 1 punches landed
+ggplot2::ggplot(Fights_data[which(Fights_data$Round1_Strikes_Punches_Landed > 0),], mapping = aes(x = Fights_data$Round1_Strikes_Punches_Landed [which(Fights_data$Round1_Strikes_Punches_Landed > 0)])) + geom_histogram(bins = 20) + xlab("Round 1 punches landed") + coord_fixed(xlim = c(0:80), ylim = c(0,50))
+
+#round 2 punches landed
+ggplot2::ggplot(Fights_data[which(Fights_data$Round2_Strikes_Punches_Landed > 0),], mapping = aes(x = Fights_data$Round2_Strikes_Punches_Landed [which(Fights_data$Round2_Strikes_Punches_Landed > 0)])) + geom_histogram(bins = 20) + xlab("Round 2 punches landed") + coord_fixed(xlim = c(0:80), ylim = c(0,50))
+
+#round 3 punches landed
+ggplot2::ggplot(Fights_data[which(Fights_data$Round3_Strikes_Punches_Landed > 0),], mapping = aes(x = Fights_data$Round3_Strikes_Punches_Landed [which(Fights_data$Round3_Strikes_Punches_Landed > 0)])) + geom_histogram(bins = 20) + xlab("Round 2 punches landed") + coord_fixed(xlim = c(0:80), ylim = c(0,50))
+
+
+ggplot(data = 
+          all_data) + geom_hex(mapping = aes(x = Age, y = Prev))
+
+
+
+```
+
+
+
+```{r Splitting training and test data with more shaping}
+#Splitting data into training and testing and Cross validation
+library(caret)
+
+#splitting data into fights that were three rounds, and fights that were five rounds
+Fights_data_three_rounds <- filter(Fights_data, Fights_data$Max_round == 3)
+Fights_data_five_rounds <- filter(Fights_data, Fights_data$Max_round == 5)
+
+
+#removing the round four and round five features from the fights with only 3 rounds
+Fights_data_three_rounds <- Fights_data_three_rounds[, -c(242:393)] 
+
+
+
+
+
+
+#Splitting data into 80% training and 20% testing by random selection for three and five round fights
+
+#making sure corresponding fights are in the same sets
+trainingIndices_three_rounds <- sample(1:nrow(Fights_data_three_rounds), .8*nrow(Fights_data_three_rounds), replace = FALSE)
+testingIndices_three_rounds <- (1:nrow(Fights_data_three_rounds))[-trainingIndices_three_rounds]
+
+trainingIndices_five_rounds <- sample(1:nrow(Fights_data_five_rounds), .8*nrow(Fights_data_five_rounds), replace = FALSE)
+testingIndices_five_rounds <- (1:nrow(Fights_data_five_rounds))[-trainingIndices_five_rounds]
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################
+##############################################################
+##############################################################
+
+copy_fights_data_three_rounds <- Fights_data_three_rounds
+
+#initializing empty training data frame
+ans_frame_train_three <- Fights_data_three_rounds[1,]
+ans_frame_train_three <- ans_frame_train_three[-1,]
+
+
+#building indices to build training and testing set
+while (nrow(ans_frame_train_three) < (0.8*nrow(Fights_data_three_rounds))) {
+
+
+  #pick random entry, find maching fight pair, add both indices to resultant dataframe and remove them from the copy:
+  
+  #pick random entry
+  index <- sample(1:nrow(copy_fights_data_three_rounds), 1)
+  
+  FID <- copy_fights_data_three_rounds[index, ]$Fight_ID
+  
+  #find matching fight pair
+  match <- filter(copy_fights_data_three_rounds, copy_fights_data_three_rounds$Fight_ID == FID)
+  
+  #combine the pair to training set
+  ans_frame_train_three <- rbind(ans_frame_train_three, match)
+
+  #removing those rows from original set
+  copy_fights_data_three_rounds <- filter(copy_fights_data_three_rounds, copy_fights_data_three_rounds$Fight_ID != FID)
+}
+
+#above method WORKS!!!!
+ans_train_safe <- ans_frame_train_three
+
+
+
+#creating teting data
+ans_frame_test_three <- subset(Fights_data_three_rounds, !(Fights_data_three_rounds$Fight_ID %in% ans_frame_train_three$Fight_ID))
+
+ans_frame_test_three_safe <- ans_frame_test_three
+
+ans_frame_test_three <- ans_frame_test_three[-c(1), ]
+
+ordering <- order(ans_frame_test_three$Fight_ID)
+
+ans_frame_test_three_temp <- ans_frame_test_three[ordering, ]
+
+ans_frame_test_three <- ans_frame_test_three_temp
+
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+
+
+# #creating training and testing data for five and three round fights
+# fights_training_three_rounds <- Fights_data_three_rounds[trainingIndices_three_rounds,]
+# fights_test_three_rounds <- Fights_data_three_rounds[testingIndices_three_rounds,]
+# 
+# #for five round fights
+# fights_training_five_rounds <- Fights_data_five_rounds[trainingIndices_five_rounds,]
+# fighs_testing_five_rounds <- Fights_data_five_rounds[testingIndices_five_rounds]
+
+
+
+
+#copying over data
+fights_training_three_rounds <- ans_frame_train_three
+fights_test_three_rounds <- ans_frame_test_three
+
+```
+
+
+
+
+```{r - Helper Functins when determining performance}
+#Preformance metrics helpers (accuracy, error, recall, F1 score, ROC)
+
+accuracy <- function(conMatrix) {
+  return ( (conMatrix[1,1] + conMatrix[2,2]) / sum(conMatrix))
+}
+
+precision <- function(conMatrix) {
+  return(conMatrix[2,2] / (conMatrix[2,2] + conMatrix[1,2]))
+}
+
+myRecall <- function(conMatrix) {
+  return (conMatrix[2,2] / (conMatrix[2,2] + conMatrix[2,1]))
+}
+
+```
+
+
+
+```{r Machine Learning Models - LOgistic Regression}
+#Training various ML models for classification
+#(Logistic regression, knn, LDA, decision tree, random forest, svm, boosting)
+
+
+#logistic regression
+logistic_model <- glm(victor ~ . - Date - Event_ID - Fight_ID - winner - corner - Last_round - Max_round- RStreak - ID - Name - Weight, 
+           data = fights_training_three_rounds,
+           family = binomial)
+
+#some features' coeffecients are NA, meaning they are linearly dependent,
+#so I will remove them from the formula
+
+logistic_model <- glm(victor ~ . - Date - Event_ID - Fight_ID - winner - corner - Last_round - Max_round- RStreak - ID - Name - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed 
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                      
+           data = fights_training_three_rounds,
+           family = binomial)
+
+
+#Analyzing performance of logistic regression on training and testing set
+
+logistic_model$xlevels[["Date"]] <- union(logistic_model$xlevels[["Date"]], levels(fights_test_three_rounds$Date))
+logistic_model$xlevels[["Name"]] <- union(logistic_model$xlevels[["Name"]], levels(fights_test_three_rounds$Name))
+
+
+
+log_predicted_train <- predict(logistic_model,fights_training_three_rounds, type = "response")
+
+log_cMatrix_train <- table(fights_training_three_rounds$victor == 1, log_predicted_train > 0.5)
+
+
+
+
+log_predicted_test <- predict(logistic_model,newdata = fights_test_three_rounds, type = "response")
+log_cMatrix_test <- table(fights_test_three_rounds$victor == 1, log_predicted_test > 0.5)
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(log_cMatrix_train)
+1 - accuracy(log_cMatrix_train)
+precision(log_cMatrix_train)
+myRecall(log_cMatrix_train)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(log_cMatrix_test)
+1 - accuracy(log_cMatrix_test)
+precision(log_cMatrix_test)
+myRecall(log_cMatrix_test)
+
+```
+
+
+
+```{r - Logistic Regression ROC Curve}
+library(pROC)
+#ROC curve for logistic regression
+
+#plot(pROC::roc(victor ~ log_predicted_test, data = fights_test_three_rounds), col="red")
+
+print("for logistic regression")
+
+auc(plot(pROC::roc(victor ~ log_predicted_test, data = fights_test_three_rounds), col="red"))
+```
+
+
+
+
+
+```{r LDA Model Creation and Analysis}
+library(MASS)
+
+#training LDA on
+LDA_model <- lda(victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts
+                      ,
+                      data = fights_training_three_rounds)
+
+#LDA confusion matrix model on training set
+lda_cmatrix_train <- table(as.numeric(predict(LDA_model, newdata = fights_training_three_rounds)[[1]]), fights_training_three_rounds$victor)
+
+
+#LDA model on testing set
+lda_cmatrix_test <- table(as.numeric(predict(LDA_model, newdata = fights_test_three_rounds)[[1]]), fights_test_three_rounds$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(lda_cmatrix_train)
+1 - accuracy(lda_cmatrix_train)
+precision(lda_cmatrix_train)
+myRecall(lda_cmatrix_train)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(lda_cmatrix_test)
+1 - accuracy(lda_cmatrix_test)
+precision(lda_cmatrix_test)
+myRecall(lda_cmatrix_test)
+```
+
+```{r - LDA ROC curve}
+#for LDA
+library(ROCR)
+
+
+lda.pred <- predict(LDA_model, newdata = fights_test_three_rounds, type = "response")
+
+pred <- prediction(lda.pred$posterior[,2], fights_test_three_rounds$victor)
+
+perf <- performance(pred, "tpr", "fpr")
+print("For LDA")
+plot(perf, colorize = FALSE)
+
+print("and the AUC is")
+perf.forauc <- performance(pred, measure = "auc")
+perf.forauc@y.values
+```
+
+
+```{r - Random Forest Model and Analysis}
+library(randomForest)
+library(rpart)
+
+RF30_model <- randomForest (victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                     data = fights_training_three_rounds, 
+                     #method = 'class')
+                     type = 'classification',
+                     ,ntree = 30)
+
+
+RF_pred_train <- round(predict(RF30_model, newdata = fights_training_three_rounds, type = "response"))
+RF_cmatrix_train <- table(RF_pred_train, fights_training_three_rounds$victor)
+
+
+
+RF_pred_test <- round(predict(RF30_model, newdata = fights_test_three_rounds, type = "response"))
+RF_cmatrix_test <- table(RF_pred_test, fights_test_three_rounds$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(RF_cmatrix_train)
+1 - accuracy(RF_cmatrix_train)
+precision(RF_cmatrix_train)
+myRecall(RF_cmatrix_train)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(RF_cmatrix_test)
+1 - accuracy(RF_cmatrix_test)
+precision(RF_cmatrix_test)
+myRecall(RF_cmatrix_test)
+```
+
+
+
+
+
+```{r - SUpport Vector Machine Model and Analysis}
+library(e1071)
+
+svm_model <- svm(victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                 data = fights_training_three_rounds,
+                 kernel = "polynomial",
+                 cost = 1,
+                 scale = FALSE)
+       
+
+
+fights_training_three_rounds$victor <- as.factor(fights_training_three_rounds$victor)
+
+#training set
+svm_pred_first <- predict(svm_model, newdata = fights_training_three_rounds)
+
+svm_cmatrix_first <- table(svm_pred_first, fights_training_three_rounds$victor)
+
+#testing set
+svm_test_pred_first <- predict(svm_model, newdata = fights_test_three_rounds)
+svm_test_cmatrix <- table(svm_test_pred_first, fights_test_three_rounds$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(svm_cmatrix_first)
+1 - accuracy(svm_cmatrix_first)
+precision(svm_cmatrix_first)
+myRecall(svm_cmatrix_first)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(svm_test_cmatrix)
+1 - accuracy(svm_test_cmatrix)
+precision(svm_test_cmatrix)
+myRecall(svm_test_cmatrix)
+
+```
+
+
+
+
+```{r}
+#Second attempt at prediction - Reshape date and rpredict
+fights_training_three_rounds_NEW <- ans_frame_train_three
+
+#on training data
+for (i in seq(from = 1, by = 2, to = nrow(ans_frame_train_three) - 2) ){
+
+
+  fights_training_three_rounds_NEW[i, ][ , 14:(ncol(ans_frame_train_three) - 1)] <- ans_frame_train_three[i, ][ , 14:(ncol(ans_frame_train_three) - 1)] - ans_frame_train_three[i + 1, ][ , 14:(ncol(ans_frame_train_three) - 1)] 
+  
+  
+  fights_training_three_rounds_NEW[i+1, ][ , 14:(ncol(ans_frame_train_three) - 1)] <- ans_frame_train_three[i+1, ][ , 14:(ncol(ans_frame_train_three) - 1)] - ans_frame_train_three[i, ][ , 14:(ncol(ans_frame_train_three) - 1)] 
+
+}
+
+
+
+fights_test_three_rounds_NEW <- ans_frame_test_three
+
+for (i in seq(from = 1, by = 2, to = nrow(ans_frame_test_three) - 2) ){
+
+  fights_test_three_rounds_NEW[i, ][ , 14:(ncol(ans_frame_test_three) - 1)] <- ans_frame_test_three[i, ][ , 14:(ncol(ans_frame_test_three) - 1)] - ans_frame_test_three[i + 1, ][ , 14:(ncol(ans_frame_test_three) - 1)] 
+  
+  
+  fights_test_three_rounds_NEW[i+1, ][ , 14:(ncol(ans_frame_test_three) - 1)] <- ans_frame_test_three[i+1, ][ , 14:(ncol(ans_frame_test_three) - 1)] - ans_frame_test_three[i, ][ , 14:(ncol(ans_frame_test_three) - 1)] 
+}
+
+
+```
+
+
+
+
+```{r - NEW Logistic Regression}
+#Retraining models on new data
+logistic_model_new <- glm(victor ~ . - Date - Event_ID - Fight_ID - winner - corner - Last_round - Max_round- RStreak - ID - Name - Weight 
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed 
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                      
+           data = fights_training_three_rounds_NEW,
+           family = binomial)
+
+
+
+
+#Analyzing performance of logistic regression on training and testing set
+
+logistic_model_new$xlevels[["Date"]] <- union(logistic_model_new$xlevels[["Date"]], levels(fights_training_three_rounds_NEW$Date))
+logistic_model_new$xlevels[["Name"]] <- union(logistic_model_new$xlevels[["Name"]], levels(fights_training_three_rounds_NEW$Name))
+
+#predicting on training data
+log_predicted_train_new <- predict(logistic_model_new, fights_training_three_rounds_NEW, type = "response")
+log_cMatrix_train_new <- table(fights_training_three_rounds_NEW$victor == 1, log_predicted_train_new > 0.5)
+
+
+#predicting on the testing data
+log_predicted_test_new <- predict(logistic_model_new,newdata = fights_test_three_rounds_NEW, type = "response")
+log_cMatrix_test_new <- table(fights_test_three_rounds_NEW$victor == 1, log_predicted_test_new > 0.5)
+
+
+
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(log_cMatrix_train_new)
+1 - accuracy(log_cMatrix_train_new)
+precision(log_cMatrix_train_new)
+myRecall(log_cMatrix_train_new)
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(log_cMatrix_test_new)
+1 - accuracy(log_cMatrix_test_new)
+precision(log_cMatrix_test_new)
+myRecall(log_cMatrix_test_new)
+
+
+```
+
+
+
+```{r - New LDA}
+LDA_model_new <- lda(victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts
+                      ,
+                      data = fights_training_three_rounds_NEW)
+
+#LDA confusion matrix model on training set
+lda_cmatrix_train_new <- table(as.numeric(predict(LDA_model_new, newdata = fights_training_three_rounds_NEW)[[1]]), fights_training_three_rounds_NEW$victor)
+
+
+#LDA model on testing set
+lda_cmatrix_test_new <- table(as.numeric(predict(LDA_model_new, newdata = fights_test_three_rounds_NEW)[[1]]), fights_test_three_rounds_NEW$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(lda_cmatrix_train_new)
+1 - accuracy(lda_cmatrix_train_new)
+precision(lda_cmatrix_train_new)
+myRecall(lda_cmatrix_train_new)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(lda_cmatrix_test_new)
+1 - accuracy(lda_cmatrix_test_new)
+precision(lda_cmatrix_test_new)
+myRecall(lda_cmatrix_test_new)
+```
+
+
+
+
+```{r - NEW Random Forest}
+
+
+
+RF30_model_NEW <- randomForest (victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - Age
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                     data = fights_training_three_rounds_NEW, 
+                     #method = 'class')
+                     type = 'classification',
+                     ,ntree = 30)
+
+
+RF_pred_train_NEW <- round(predict(RF30_model_NEW, newdata = fights_training_three_rounds_NEW, type = "response"))
+RF_cmatrix_train_NEW <- table(RF_pred_train_NEW, fights_training_three_rounds_NEW$victor)
+
+
+
+RF_pred_test_NEW <- round(predict(RF30_model_NEW, newdata = fights_test_three_rounds_NEW, type = "response"))
+RF_cmatrix_test_NEW <- table(RF_pred_test_NEW, fights_test_three_rounds_NEW$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(RF_cmatrix_train_NEW)
+1 - accuracy(RF_cmatrix_train_NEW)
+precision(RF_cmatrix_train_NEW)
+myRecall(RF_cmatrix_train_NEW)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(RF_cmatrix_test_NEW)
+1 - accuracy(RF_cmatrix_test_NEW)
+precision(RF_cmatrix_test_NEW)
+myRecall(RF_cmatrix_test_NEW)
+```
+
+
+
+```{r - NEW SVM}
+svm_model_NEW <- svm(victor ~ . 
+                      - Date 
+                      - Event_ID 
+                      - Fight_ID 
+                      - winner 
+                      - corner 
+                      - Last_round - Max_round- RStreak - ID - Name 
+                      - Weight
+                      - Round3_TIP_Standing.Time
+                      - Round3_TIP_Side.Control.Time
+                      - Round3_Strikes_Total.Strikes_Landed
+                      - Round3_Strikes_Total.Strikes_Attempts
+                      - Round3_Strikes_Significant.Strikes_Landed
+                      - Round3_Strikes_Significant.Strikes_Attempts
+                      - Round3_Strikes_Legs.Total.Strikes_Landed
+                      - Round3_Strikes_Legs.Total.Strikes_Attempts
+                      - Round3_Strikes_Legs.Significant.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Landed
+                      - Round3_Strikes_Distance.Strikes_Attempts
+                      - Round2_TIP_Standing.Time
+                      - Round2_TIP_Side.Control.Time
+                      - Round2_Strikes_Total.Strikes_Landed
+                      - Round2_Strikes_Total.Strikes_Attempts
+                      - Round2_Strikes_Significant.Strikes_Landed
+                      - Round2_Strikes_Significant.Strikes_Attempts
+                      - Round2_Strikes_Legs.Total.Strikes_Landed
+                      - Round2_Strikes_Legs.Total.Strikes_Attempts
+                      - Round2_Strikes_Legs.Significant.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Landed
+                      - Round2_Strikes_Distance.Strikes_Attempts
+                      - Round1_TIP_Side.Control.Time
+                      - Round1_Strikes_Total.Strikes_Landed
+                      - Round1_Strikes_Total.Strikes_Attempts
+                      - Round1_Strikes_Significant.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Landed
+                      - Round1_Strikes_Legs.Total.Strikes_Attempts
+                      - Round1_Strikes_Distance.Strikes_Landed
+                      - Round1_Strikes_Distance.Strikes_Attempts,
+                 data = fights_training_three_rounds_NEW,
+                 kernel = "polynomial",
+                 cost = 1,
+                 scale = FALSE)
+       
+
+
+#predict(svm_model, newdata = fights_training_three_rounds)
+fights_training_three_rounds$victor <- as.factor(fights_training_three_rounds$victor)
+
+#training set
+predict_svm <- as.numeric((round(predict(svm_model_NEW, newdata = fights_training_three_rounds_NEW))) > 0)
+
+cmatrix_svm <- table(predict_svm, fights_training_three_rounds_NEW$victor)
+
+
+
+#testing set
+predict_svm_test <-  as.numeric((round(predict(svm_model_NEW, newdata = fights_test_three_rounds))) > 0)
+svm_test_matrix <- table(predict_svm_test, fights_test_three_rounds_NEW$victor)
+
+
+print("On the training data, the accuracy, error, precision, and recall are")
+accuracy(cmatrix_svm)
+1 - accuracy(cmatrix_svm)
+precision(cmatrix_svm)
+myRecall(cmatrix_svm)
+
+
+print("On the testing set, the accuracy, error, precision, and recall are")
+accuracy(svm_test_matrix)
+1 - accuracy(svm_test_matrix)
+precision(svm_test_matrix)
+myRecall(svm_test_matrix)
+
+```
+
+
+
+
+
+```{r - Results}
+
+#compaing old and new accuracies for models on training data
+
+#old vs new accuracy for models
+
+old_means_acc <- c(0.833,0.8022,0.9221,0.7499)
+new_means_acc <- c(0.9437, 0.888, 0.966, 0.7979)
+
+
+old_error_means <- c(0.16, 0.1977, 0.07786, 0.2510)
+new_error_means <- c(0.056, 0.1114, 0.0337, 0.2021)
+
+old_precision_means <- c(0.888, 0.735, 0.8492, 0.637)
+new_precision_means <- c(0.9539, 0.883, 0.9673, 0.687)
+
+old_recall_means <- c(0.7637, 0.8514, 0.9952, 0.829)
+new_recall_means <- c(0.9325, 0.892, 0.9653, 0.849)
+```
+
+
+
+
+
+
+
+
+
+
+
